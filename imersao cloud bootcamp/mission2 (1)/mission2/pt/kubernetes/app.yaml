@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: luxxy-covid-testing-system
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  selector:
+    app: luxxy-covid-testing-system
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: luxxy-covid-testing-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: luxxy-covid-testing-system
+  template:
+    metadata:
+      labels:
+        app: luxxy-covid-testing-system
+    spec:
+      containers:
+      - name: luxxy-covid-testing-system
+        image: w3ll1n9t0n/luxxy-covid-testing-system-app-pt:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_HOST_NAME
+          value: "10.96.73.166"
+        - name: DB_USER
+          value: "app"
+        - name: DB_PASSWORD
+          value: "welcome123456"
+        - name: DB_NAME
+          value: "dbcovidtesting"
+        - name: DB_PORT
+          value: "3306"
+        - name: AWS_BUCKET
+          value: "luxxy-covid-testing-system-pdf-pt-wps"
+        - name: S3_ACCESS_KEY
+          value: "AKIA2GRQGHB66GP7CFMS"
+        - name: S3_SECRET_ACCESS_KEY
+          value: "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"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-db
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql-db
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-db
+  template:
+    metadata:
+      labels:
+        app: mysql-db
+    spec:
+      containers:
+      - name: mysql-db
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root_password"
+        - name: MYSQL_DATABASE
+          value: "dbcovidtesting"
+        - name: MYSQL_USER
+          value: "app"
+        - name: MYSQL_PASSWORD
+          value: "welcome123456"
+
+
